@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shadow Brothers</title>
+  <style>
+    body {
+      background-color: #1a1a1a;
+      color: #d6c6a8;
+      font-family: 'Georgia', serif;
+      padding: 20px;
+      max-width: 700px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      color: #ffa94d;
+      font-size: 2.5em;
+    }
+    .boss-panel, .signup, .names, .admin {
+      background: #2a2a2a;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    input[type="text"], input[type="date"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 1em;
+      margin-bottom: 10px;
+      background: #333;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #ffa94d;
+      color: #000;
+      font-weight: bold;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+    .names ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    .names li {
+      padding: 5px 0;
+    }
+    #limitMsg1, #limitMsg2 {
+      color: #ff6b6b;
+      margin-top: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>SHADOW BROTHERS</h1>
+
+  <div class="boss-panel">
+    <h2>Ferumbras Ascendant</h2>
+    <p>Date: <input type="date" id="ferumbrasDate" /></p>
+  </div>
+
+  <div class="signup">
+    <h2>Sign Up for Ferumbras (Max: 15 Players)</h2>
+    <input type="text" id="ferumbrasName" placeholder="Enter your name" />
+    <input type="text" id="ferumbrasVoc" placeholder="Enter your vocation" />
+    <input type="text" id="ferumbrasLvl" placeholder="Enter your level" />
+    <button onclick="addName('ferumbras')">Confirm</button>
+    <p id="limitMsg1"></p>
+  </div>
+
+  <div class="names">
+    <h2>Ferumbras Participants</h2>
+    <ul id="ferumbrasList"></ul>
+  </div>
+
+  <div class="boss-panel">
+    <h2>World of Destruction</h2>
+    <p>Date: <input type="date" id="wodDate" /></p>
+  </div>
+
+  <div class="signup">
+    <h2>Sign Up for WOD (Max: 15 Players)</h2>
+    <input type="text" id="wodName" placeholder="Enter your name" />
+    <input type="text" id="wodVoc" placeholder="Enter your vocation" />
+    <input type="text" id="wodLvl" placeholder="Enter your level" />
+    <button onclick="addName('wod')">Confirm</button>
+    <p id="limitMsg2"></p>
+  </div>
+
+  <div class="names">
+    <h2>WOD Participants</h2>
+    <ul id="wodList"></ul>
+  </div>
+
+  <script>
+    function addName(boss) {
+      const name = document.getElementById(boss + "Name").value.trim();
+      const voc = document.getElementById(boss + "Voc").value.trim();
+      const lvl = document.getElementById(boss + "Lvl").value.trim();
+      const limitMsg = document.getElementById("limitMsg" + (boss === "ferumbras" ? "1" : "2"));
+      let players = JSON.parse(localStorage.getItem(boss + "SignUps") || "[]");
+      if (players.length >= 15) {
+        limitMsg.textContent = "Limit reached: 15 players already confirmed.";
+        return;
+      }
+      if (name && voc && lvl && !players.find(p => p.name === name)) {
+        players.push({ name, voc, lvl });
+        localStorage.setItem(boss + "SignUps", JSON.stringify(players));
+        updateList(boss);
+        document.getElementById(boss + "Name").value = "";
+        document.getElementById(boss + "Voc").value = "";
+        document.getElementById(boss + "Lvl").value = "";
+        limitMsg.textContent = "";
+      } else if (players.find(p => p.name === name)) {
+        limitMsg.textContent = "You have already confirmed.";
+      } else {
+        limitMsg.textContent = "Please fill all fields.";
+      }
+    }
+
+    function updateList(boss) {
+      const list = document.getElementById(boss + "List");
+      list.innerHTML = "";
+      let players = JSON.parse(localStorage.getItem(boss + "SignUps") || "[]");
+      players.forEach(player => {
+        const li = document.createElement("li");
+        li.textContent = `${player.name} - ${player.voc} - Level ${player.lvl}`;
+        list.appendChild(li);
+      });
+    }
+
+    function loadDates() {
+      document.getElementById("ferumbrasDate").value = localStorage.getItem("ferumbrasDate") || "2025-07-01";
+      document.getElementById("wodDate").value = localStorage.getItem("wodDate") || "2025-07-15";
+    }
+
+    document.getElementById("ferumbrasDate").addEventListener("change", () => {
+      localStorage.setItem("ferumbrasDate", document.getElementById("ferumbrasDate").value);
+    });
+    document.getElementById("wodDate").addEventListener("change", () => {
+      localStorage.setItem("wodDate", document.getElementById("wodDate").value);
+    });
+
+    loadDates();
+    updateList("ferumbras");
+    updateList("wod");
+  </script>
+</body>
+</html>
